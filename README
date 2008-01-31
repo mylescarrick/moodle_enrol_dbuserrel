@@ -1,0 +1,7 @@
+This plugin allows you to configure automatic relationships between users from an external database.  One day, after MDL-13205, this might be folded into enrol/db.
+
+Users familiar with enrol/db should have no problems configuring this.
+
+Plugin has been tested on 1.9 but I don't see why it wouldn't work on HEAD/2.0 too.
+
+Penny Leach <penny@catalyst.net.nz>
