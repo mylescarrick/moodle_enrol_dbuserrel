@@ -4,4 +4,7 @@ Users familiar with enrol/db should have no problems configuring this.
 
 Plugin has been tested on 1.9 but I don't see why it wouldn't work on HEAD/2.0 too.
 
+Language file enrol_dbuserrel.php needs to go in lang/en_utf8/ (for example)
+
+
 Penny Leach <penny@catalyst.net.nz>
