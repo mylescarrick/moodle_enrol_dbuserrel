@@ -36,7 +36,7 @@ function setup_enrolments(&$user=null) {
         $subjectfield = $enroldb->quote($user->{$flocalsubject});
         $objectfield = $enroldb->quote($user->{$flocalobject});
 
-        $sql = "SELECT * FROM {$dbtable} 
+        $sql = "SELECT * FROM {$dbtable}
             WHERE {$fremotesubject} = $subjectfield
             OR {$fremoteobject} = $objectfield";
     } else {
@@ -45,15 +45,15 @@ function setup_enrolments(&$user=null) {
 
     if ($rs = $enroldb->Execute($sql)) {
 
-
-        $sql = "SELECT r.{$flocalrole} || '|' || u1.{$flocalsubject} || '|' || u2.{$flocalobject} AS unique,
+        $uniqfield = sql_concat("r.$flocalrole", "'|'", "u1.$flocalsubject", "'|'", "u2.$flocalobject");
+        $sql = "SELECT $uniqfield AS uniq,
             ra.*, r.{$flocalrole} ,
             u1.{$flocalsubject} AS subjectid,
             u2.{$flocalobject} AS objectid
-            FROM {$CFG->prefix}role_assignments ra 
+            FROM {$CFG->prefix}role_assignments ra
             JOIN {$CFG->prefix}role r ON ra.roleid = r.id
-            JOIN {$CFG->prefix}context c ON c.id = ra.contextid 
-            JOIN {$CFG->prefix}user u1 ON ra.userid = u1.id 
+            JOIN {$CFG->prefix}context c ON c.id = ra.contextid
+            JOIN {$CFG->prefix}user u1 ON ra.userid = u1.id
             JOIN {$CFG->prefix}user u2 ON c.instanceid = u2.id
             WHERE c.contextlevel = " . CONTEXT_USER .
             (!empty($user) ?  " AND c.instanceid = {$user->id} OR ra.userid = {$user->id}" : '');
@@ -64,7 +64,7 @@ function setup_enrolments(&$user=null) {
 
         if (!$rs->EOF) {
 
-            $roles = get_records('role', '', '', '', $flocalrole . ",*");
+            $roles = get_records('role', '', '', '', "$flocalrole, id");
             $subjectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
             $objectusers = array(); // cache of mapping of localsubjectuserfield to mdl_user.id (for get_context_instance)
             $contexts = array(); // cache
@@ -103,7 +103,7 @@ function setup_enrolments(&$user=null) {
                     continue;
                 }
                 $context = get_context_instance(CONTEXT_USER, $objectusers[$row->{$fremoteobject}]);
-                error_log("Information: [" . $row->{$fremotesubject} . "] assigning " . $row->{$fremoterole} . " to " . $row->{$fremotesubject} 
+                error_log("Information: [" . $row->{$fremotesubject} . "] assigning " . $row->{$fremoterole} . " to " . $row->{$fremotesubject}
                    . " on " . $row->{$fremoteobject});
                 role_assign($roles[$row->{$fremoterole}]->id, $subjectusers[$row->{$fremotesubject}], 0, $context->id, 0, 0, 0, 'dbuserrel');
             }
@@ -136,7 +136,7 @@ function config_form($frm) {
         'type', 'host', 'user', 'pass', 'name', 'userenroldatabase',
         'useauthdb', 'table', 'localsubjectuserfield', 'localobjectuserfield',
         'remotesubjectuserfield', 'remoteobjectuserfield', 'remoterolefield', 'localrolefield',
-        'useauthdb', 'useenroldatabase',        
+        'useauthdb', 'useenroldatabase',
         );
 
     foreach ($vars as $var) {
@@ -150,7 +150,7 @@ function config_form($frm) {
 
 /// Override the base process_config() function
 function process_config($config) {
-    foreach ((array)$config as $key => $value) { 
+    foreach ((array)$config as $key => $value) {
         if (strpos($key, 'enrol_dbuserrel_') !== 0) {
             continue;
         }
@@ -204,3 +204,4 @@ function enrol_disconnect($enroldb) {
 
 
 ?>
+
